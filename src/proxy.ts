@@ -8,7 +8,7 @@ export async function proxy(request: NextRequest) {
   // Rutas estáticas de activos públicos
   if (
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/api/') ||
+    (pathname.startsWith('/api/') && !pathname.startsWith('/api/admin')) ||
     pathname.includes('.')
   ) {
     return NextResponse.next();
@@ -37,12 +37,17 @@ export async function proxy(request: NextRequest) {
   }
 
   // 3. Proteger las rutas específicas según el rol
-  const pathsProtegidos = ['/admin', '/docente', '/padre'];
+  const pathsProtegidos = ['/admin', '/docente', '/padre', '/api/admin'];
   const pathProtegido = pathsProtegidos.find((p) => pathname.startsWith(p));
 
   if (pathProtegido) {
+    const isApi = pathProtegido.startsWith('/api/');
+
     if (!payload) {
-      // No autenticado, redirigir a login
+      // No autenticado
+      if (isApi) {
+        return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+      }
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
@@ -52,6 +57,9 @@ export async function proxy(request: NextRequest) {
 
     if (rutaRequerida === '/admin' && rolUsuario !== 'admin') {
       return NextResponse.redirect(new URL('/login', request.url));
+    }
+    if (rutaRequerida === '/api/admin' && rolUsuario !== 'admin') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
     if (rutaRequerida === '/docente' && rolUsuario !== 'docente') {
       return NextResponse.redirect(new URL('/login', request.url));
@@ -65,5 +73,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/docente/:path*', '/padre/:path*', '/login'],
+  matcher: ['/admin/:path*', '/docente/:path*', '/padre/:path*', '/login', '/api/admin/:path*'],
 };
