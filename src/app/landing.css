@@ -1,0 +1,165 @@
+/* Landing Page Stylesheet */
+.landing-wrapper {
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #07070a 70%);
+  color: #f3f4f6;
+  font-family: var(--font-geist-sans), 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  overflow-x: hidden;
+}
+
+/* Hero Section */
+.hero-section {
+  text-align: center;
+  max-width: 800px;
+  margin-bottom: 4rem;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+  background: linear-gradient(135deg, #a78bfa 0%, #f472b6 50%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.03em;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: #9ca3af;
+  max-width: 600px;
+  margin: 0 auto 2.5rem auto;
+  line-height: 1.6;
+}
+
+/* Grid de Portales */
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 960px;
+  margin-bottom: 4rem;
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+.portal-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  padding: 2.25rem;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.portal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: transparent;
+  transition: background 0.3s ease;
+}
+
+.portal-card-admin::before {
+  background: linear-gradient(90deg, #8b5cf6, #ec4899);
+}
+
+.portal-card-docente::before {
+  background: linear-gradient(90deg, #10b981, #3b82f6);
+}
+
+.portal-card-padre::before {
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+}
+
+.portal-card:hover {
+  transform: translateY(-8px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.portal-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  transition: transform 0.3s ease;
+}
+
+.portal-card:hover .portal-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.portal-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: #fff;
+}
+
+.portal-desc {
+  font-size: 0.95rem;
+  color: #9ca3af;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.btn-card {
+  margin-top: auto;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.portal-card:hover .btn-card {
+  background: #fff;
+  color: #07070a;
+}
+
+/* Footer info */
+.landing-footer {
+  color: #4b5563;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: auto;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
