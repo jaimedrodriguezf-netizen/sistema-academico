@@ -50,7 +50,7 @@ async function seed() {
     };
 
     await insertarUsuarioSiNoExiste('1710034065', 'Administrador General', 'admin@unidadeducativa.edu.ec', 1, 'admin123');
-    await insertarUsuarioSiNoExiste('1710034057', 'Administrador Académico', 'admin@academico.com', 1, 'danro32676');
+    await insertarUsuarioSiNoExiste('1719623512', 'Administrador Académico', 'admin@academico.com', 1, 'danro32676');
     await insertarUsuarioSiNoExiste('1722210380', 'Prof. Jaime Rodríguez', 'jaime.docente@unidadeducativa.edu.ec', 2, 'docente123');
     await insertarUsuarioSiNoExiste('0926715103', 'Carlos Pérez (Padre de Familia)', 'carlos.padre@gmail.com', 3, 'padre123');
 
