@@ -336,7 +336,7 @@
 }
 
 /* ── Responsive: sidebar colapsado lateral en móvil ─────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .admin-sidebar {
     width: var(--sidebar-collapsed-w);
   }
@@ -387,6 +387,9 @@
   .sidebar-logout-btn {
     justify-content: center;
     padding: var(--sp-3) 0;
+    color: var(--danger);
+    background: var(--danger-soft);
+    border-color: rgba(239, 68, 68, 0.2);
   }
 
   .sidebar-logout-text {

@@ -43,8 +43,7 @@ describe('API Route Handler: GET and POST /api/admin/usuarios', () => {
         from: mockFrom,
       });
 
-      const req = new NextRequest('http://localhost/api/admin/usuarios');
-      const res = await GET(req);
+      const res = await GET();
 
       expect(res.status).toBe(200);
       const body = await res.json();
