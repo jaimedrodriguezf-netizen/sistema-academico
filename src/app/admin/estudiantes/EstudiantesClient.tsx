@@ -36,7 +36,8 @@ export default function EstudiantesClient() {
   const [editingEstudiante, setEditingEstudiante] = useState<Estudiante | null>(null);
 
   // Form
-  const [nombre, setNombre] = useState('');
+  const [nombres, setNombres] = useState('');
+  const [apellidos, setApellidos] = useState('');
   const [cedula, setCedula] = useState('');
   const [genero, setGenero] = useState('');
   const [fechaNacimiento, setFechaNacimiento] = useState('');
@@ -83,7 +84,7 @@ export default function EstudiantesClient() {
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const resetForm = () => {
-    setNombre(''); setCedula(''); setGenero('');
+    setNombres(''); setApellidos(''); setCedula(''); setGenero('');
     setFechaNacimiento(''); setNivelId(''); setPadreId('');
     setErrors({});
   };
@@ -96,7 +97,27 @@ export default function EstudiantesClient() {
 
   const openEditModal = (est: Estudiante) => {
     setEditingEstudiante(est);
-    setNombre(est.nombre);
+    
+    // Split full name into names and last names
+    const partes = est.nombre.trim().split(/\s+/);
+    let n = est.nombre;
+    let a = '';
+    if (partes.length > 1) {
+      if (partes.length === 2) {
+        n = partes[0];
+        a = partes[1];
+      } else if (partes.length === 3) {
+        n = partes[0];
+        a = partes.slice(1).join(' ');
+      } else {
+        const indexDivision = partes.length - 2;
+        n = partes.slice(0, indexDivision).join(' ');
+        a = partes.slice(indexDivision).join(' ');
+      }
+    }
+    setNombres(n);
+    setApellidos(a);
+
     setCedula(est.cedula || '');
     setGenero(est.genero || '');
     setFechaNacimiento(est.fechaNacimiento ? est.fechaNacimiento.substring(0, 10) : '');
@@ -110,7 +131,8 @@ export default function EstudiantesClient() {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
 
-    if (!nombre.trim()) newErrors.nombre = 'El nombre es obligatorio';
+    if (!nombres.trim()) newErrors.nombres = 'Los nombres son obligatorios';
+    if (!apellidos.trim()) newErrors.apellidos = 'Los apellidos son obligatorios';
     if (!nivelId) newErrors.nivelId = 'El nivel es obligatorio';
     if (!padreId) newErrors.padreId = 'El padre/tutor es obligatorio';
 
@@ -120,7 +142,7 @@ export default function EstudiantesClient() {
     }
 
     const payload = {
-      nombre: nombre.trim(),
+      nombre: `${nombres.trim()} ${apellidos.trim()}`,
       cedula: cedula.trim() || null,
       genero: genero || null,
       fechaNacimiento: fechaNacimiento || null,
@@ -340,17 +362,32 @@ export default function EstudiantesClient() {
               <div className="modal-body">
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="form-est-nombre">Nombre completo *</label>
+                    <label htmlFor="form-est-nombres">Nombres *</label>
                     <input
                       type="text"
-                      id="form-est-nombre"
+                      id="form-est-nombres"
                       className="form-input"
-                      value={nombre}
-                      onChange={(e) => setNombre(e.target.value)}
-                      placeholder="Ej: Juan Carlos Pérez"
+                      value={nombres}
+                      onChange={(e) => setNombres(e.target.value)}
+                      placeholder="Ej: Juan Carlos"
                     />
-                    {errors.nombre && <span className="invalid-feedback">{errors.nombre}</span>}
+                    {errors.nombres && <span className="invalid-feedback">{errors.nombres}</span>}
                   </div>
+                  <div className="form-group">
+                    <label htmlFor="form-est-apellidos">Apellidos *</label>
+                    <input
+                      type="text"
+                      id="form-est-apellidos"
+                      className="form-input"
+                      value={apellidos}
+                      onChange={(e) => setApellidos(e.target.value)}
+                      placeholder="Ej: Pérez Gómez"
+                    />
+                    {errors.apellidos && <span className="invalid-feedback">{errors.apellidos}</span>}
+                  </div>
+                </div>
+
+                <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="form-est-cedula">Cédula (opcional)</label>
                     <input
