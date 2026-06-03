@@ -4,9 +4,9 @@
 - [x] 1.1 Modificar `src/proxy.ts` para restringir el acceso a `/admin/:path*` y `/api/admin/:path*` solo a administradores.
 
 ## Phase 2: Core Endpoints Implementation (Test-First)
-- [ ] 2.1 **RED**: Crear prueba de integración en `src/app/api/admin/usuarios/__tests__/route.test.ts` que valide el listado (GET) y la creación (POST) de usuarios con sus restricciones.
-- [ ] 2.2 **GREEN**: Implementar el Route Handler `/api/admin/usuarios` en `src/app/api/admin/usuarios/route.ts` para que pasen las pruebas.
-- [ ] 2.3 **REFACTOR**: Optimizar y limpiar la lógica del Route Handler en `src/app/api/admin/usuarios/route.ts`.
+- [x] 2.1 **RED**: Crear prueba de integración en `src/app/api/admin/usuarios/__tests__/route.test.ts` que valide el listado (GET) y la creación (POST) de usuarios con sus restricciones.
+- [x] 2.2 **GREEN**: Implementar el Route Handler `/api/admin/usuarios` en `src/app/api/admin/usuarios/route.ts` para que pasen las pruebas.
+- [x] 2.3 **REFACTOR**: Optimizar y limpiar la lógica del Route Handler en `src/app/api/admin/usuarios/route.ts`.
 - [ ] 2.4 **RED**: Crear prueba de integración en `src/app/api/admin/usuarios/[id]/__tests__/route.test.ts` que valide la edición (PUT), la eliminación (DELETE) y la prevención de auto-eliminación/degradación.
 - [ ] 2.5 **GREEN**: Implementar el Route Handler en `src/app/api/admin/usuarios/[id]/route.ts` que haga pasar las pruebas.
 - [ ] 2.6 **REFACTOR**: Limpiar y tipar adecuadamente el Route Handler `/api/admin/usuarios/[id]/route.ts`.
