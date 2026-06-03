@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { verificarToken } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import AdminSidebar from './AdminSidebar';
+import AdminShellClient from './AdminShellClient';
 import './admin-layout.css';
 
 export const metadata = {
@@ -23,11 +23,8 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="admin-shell">
-      <AdminSidebar adminId={admin.usuarioId} />
-      <main className="admin-main">
-        {children}
-      </main>
-    </div>
+    <AdminShellClient adminId={admin.usuarioId}>
+      {children}
+    </AdminShellClient>
   );
 }

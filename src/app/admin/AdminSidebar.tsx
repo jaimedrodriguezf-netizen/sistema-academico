@@ -6,6 +6,8 @@ import { useState } from 'react';
 
 interface AdminSidebarProps {
   adminId: number;
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
 const navItems = [
@@ -54,7 +56,7 @@ const navItems = [
   },
 ];
 
-export default function AdminSidebar({ adminId }: AdminSidebarProps) {
+export default function AdminSidebar({ adminId, onToggle }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -82,6 +84,15 @@ export default function AdminSidebar({ adminId }: AdminSidebarProps) {
           <span className="sidebar-brand-name">SisAcadémico</span>
           <span className="sidebar-brand-role">Panel Admin</span>
         </div>
+        <button
+          className="sidebar-collapse-btn"
+          onClick={onToggle}
+          aria-label="Ocultar menú"
+        >
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+          </svg>
+        </button>
       </div>
 
       {/* Navigation */}

@@ -110,7 +110,12 @@
   overflow-y: auto;
   flex-shrink: 0;
   z-index: 100;
-  transition: width var(--dur-std) var(--ease-std);
+  transform: translateX(0);
+  opacity: 1;
+  transition:
+    width var(--dur-std) var(--ease-std),
+    transform var(--dur-std) var(--ease-std),
+    opacity var(--dur-std) var(--ease-std);
 }
 
 /* Brand */
@@ -337,6 +342,7 @@
   display: flex;
   flex-direction: column;
   padding-left: var(--sidebar-w);
+  transition: padding-left var(--dur-std) var(--ease-std);
 }
 
 /* ── Responsive: sidebar colapsado lateral en móvil ─────────────────── */
@@ -401,6 +407,77 @@
   }
 
   .sidebar-logout-text {
+    display: none;
+  }
+}
+
+/* ── Sidebar Toggling & Collapsing States ───────────────────── */
+.sidebar-collapse-btn {
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  color: var(--text-tertiary);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: auto;
+  transition: all var(--dur-fast) var(--ease-std);
+}
+
+.sidebar-collapse-btn:hover {
+  color: var(--text-primary);
+  background: var(--ink-700);
+  border-color: var(--border-emphasis);
+}
+
+.sidebar-open-btn-floating {
+  position: fixed;
+  left: 16px;
+  top: 16px;
+  z-index: 99;
+  background: var(--ink-900);
+  border: 1px solid var(--border-emphasis);
+  color: var(--text-primary);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all var(--dur-fast) var(--ease-std);
+}
+
+.sidebar-open-btn-floating:hover {
+  background: var(--ink-700);
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.admin-shell.sidebar-closed .admin-sidebar {
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.admin-shell.sidebar-closed .admin-main {
+  padding-left: 0;
+}
+
+.admin-shell.sidebar-closed .page-header {
+  padding-left: 60px !important;
+}
+
+.page-header {
+  transition: padding-left var(--dur-std) var(--ease-std) !important;
+}
+
+@media (max-width: 640px) {
+  .sidebar-collapse-btn {
     display: none;
   }
 }
