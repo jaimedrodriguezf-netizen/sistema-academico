@@ -29,7 +29,7 @@ describe('Admin Usuarios Page Component', () => {
     const pageElement = await AdminUsuariosPage();
     render(pageElement);
     
-    expect(screen.getByText('Panel de Administración: Usuarios')).toBeDefined();
+    expect(screen.getByText('Usuarios')).toBeDefined();
     expect(screen.getByPlaceholderText('Buscar por nombre o cédula...')).toBeDefined();
   });
 });

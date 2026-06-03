@@ -1,0 +1,379 @@
+/* ============================================================
+   Admin Panel — Shell & Sidebar
+   Paleta: pizarrón oscuro (--ink-900) + índigo institucional
+   Profundidad: solo bordes, sin sombras dramáticas
+   Tipografía: 'Outfit' / system-ui — jerarquía real en pesos
+   Base unit: 4px (1rem = 16px)
+   ============================================================ */
+
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* ── Tokens ────────────────────────────────────────────────── */
+:root {
+  /* Surfaces — mismo matiz, solo brillo cambia */
+  --ink-950: #09090f;
+  --ink-900: #0f0f1a;
+  --ink-800: #16162a;
+  --ink-700: #1e1e36;
+  --ink-600: #252540;
+  --ink-500: #32324f;
+
+  /* Brand índigo */
+  --brand: #6366f1;
+  --brand-soft: rgba(99, 102, 241, 0.12);
+  --brand-glow: rgba(99, 102, 241, 0.25);
+
+  /* Text jerarquía de 4 niveles */
+  --text-primary: #f1f1f7;
+  --text-secondary: #b0b0c8;
+  --text-tertiary: #7070a0;
+  --text-muted: #4a4a70;
+
+  /* Bordes — bajos en opacidad, nunca duros */
+  --border-soft: rgba(255, 255, 255, 0.05);
+  --border-std: rgba(255, 255, 255, 0.08);
+  --border-emphasis: rgba(255, 255, 255, 0.14);
+  --border-brand: rgba(99, 102, 241, 0.4);
+
+  /* Semánticos */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --success-soft: rgba(16, 185, 129, 0.12);
+  --warning-soft: rgba(245, 158, 11, 0.12);
+  --danger-soft: rgba(239, 68, 68, 0.12);
+
+  /* Roles — signature de color por categoría */
+  --role-admin: #6366f1;
+  --role-admin-soft: rgba(99, 102, 241, 0.14);
+  --role-docente: #10b981;
+  --role-docente-soft: rgba(16, 185, 129, 0.14);
+  --role-padre: #f59e0b;
+  --role-padre-soft: rgba(245, 158, 11, 0.14);
+
+  /* Sidebar */
+  --sidebar-w: 240px;
+  --sidebar-collapsed-w: 64px;
+
+  /* Spacing scale (base 4px) */
+  --sp-1: 0.25rem;   /* 4px */
+  --sp-2: 0.5rem;    /* 8px */
+  --sp-3: 0.75rem;   /* 12px */
+  --sp-4: 1rem;      /* 16px */
+  --sp-5: 1.25rem;   /* 20px */
+  --sp-6: 1.5rem;    /* 24px */
+  --sp-8: 2rem;      /* 32px */
+
+  /* Radii */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+
+  /* Motion */
+  --ease-std: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 150ms;
+  --dur-std: 220ms;
+}
+
+/* ── Reset y base ──────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Shell: sidebar + contenido ────────────────────────────── */
+.admin-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--ink-950);
+  color: var(--text-primary);
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────── */
+.admin-sidebar {
+  width: var(--sidebar-w);
+  min-height: 100vh;
+  background: var(--ink-900);
+  border-right: 1px solid var(--border-std);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  flex-shrink: 0;
+  transition: width var(--dur-std) var(--ease-std);
+}
+
+/* Brand */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-6) var(--sp-5);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.sidebar-brand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-md);
+  background: var(--brand-soft);
+  border: 1px solid var(--border-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand);
+  flex-shrink: 0;
+}
+
+.sidebar-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.sidebar-brand-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.sidebar-brand-role {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--brand);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Nav */
+.sidebar-nav {
+  flex: 1;
+  padding: var(--sp-5) var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.sidebar-nav-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0 var(--sp-3) var(--sp-2);
+}
+
+.sidebar-nav-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-3);
+  border-radius: var(--r-md);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-std),
+    background var(--dur-fast) var(--ease-std);
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+  color: var(--text-primary);
+  background: var(--ink-700);
+}
+
+.sidebar-nav-item--active {
+  color: var(--brand);
+  background: var(--brand-soft);
+  border-color: var(--border-brand);
+  font-weight: 600;
+}
+
+.sidebar-nav-item--active:hover {
+  color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.sidebar-nav-item--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  user-select: none;
+}
+
+.sidebar-active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.sidebar-badge-soon {
+  margin-left: auto;
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--ink-600);
+  border: 1px solid var(--border-soft);
+  border-radius: 20px;
+  padding: 2px 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Footer */
+.sidebar-footer {
+  padding: var(--sp-4) var(--sp-3);
+  border-top: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.sidebar-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  border: 1px solid var(--border-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand);
+  flex-shrink: 0;
+}
+
+.sidebar-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.sidebar-user-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-user-badge {
+  font-size: 0.6875rem;
+  color: var(--brand);
+  font-weight: 500;
+}
+
+.sidebar-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+  padding: var(--sp-3) var(--sp-3);
+  border-radius: var(--r-md);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-std),
+    background var(--dur-fast) var(--ease-std),
+    border-color var(--dur-fast) var(--ease-std);
+  text-align: left;
+}
+
+.sidebar-logout-btn:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.sidebar-logout-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Main content ──────────────────────────────────────────── */
+.admin-main {
+  flex: 1;
+  min-width: 0;
+  background: var(--ink-950);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Responsive: sidebar colapsado en móvil ─────────────────── */
+@media (max-width: 768px) {
+  .admin-shell {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    min-height: unset;
+    height: auto;
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid var(--border-std);
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    padding: var(--sp-2) var(--sp-3);
+    overflow-x: auto;
+  }
+
+  .sidebar-nav-label {
+    display: none;
+  }
+
+  .sidebar-nav-list {
+    flex-direction: row;
+    gap: var(--sp-2);
+  }
+
+  .sidebar-active-dot {
+    display: none;
+  }
+
+  .sidebar-brand {
+    padding: var(--sp-4) var(--sp-5);
+  }
+
+  .sidebar-footer {
+    display: none;
+  }
+}

@@ -192,7 +192,7 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
   });
 
   return (
-    <div className="admin-container">
+    <div className="page-content">
       {/* Toast Notification */}
       {toast && (
         <div className={`alert-toast alert-toast-${toast.type}`} id="toast-notif">
@@ -200,14 +200,14 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
         </div>
       )}
 
-      {/* Header */}
-      <header className="admin-header">
-        <div className="admin-header-title">
-          <h1>Panel de Administración: Usuarios</h1>
-          <p>Gestioná los usuarios de tu institución, asigná roles y controlá accesos.</p>
+      {/* Page Header */}
+      <header className="page-header">
+        <div className="page-header-text">
+          <h1 className="page-title">Usuarios</h1>
+          <p className="page-subtitle">Gestioná usuarios, asigná roles y controlá accesos.</p>
         </div>
         <button className="btn-primary" onClick={openAddModal} id="btn-add-user">
-          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"/>
           </svg>
           Registrar Usuario
