@@ -7,9 +7,9 @@
 - [x] 2.1 **RED**: Crear prueba de integración en `src/app/api/admin/usuarios/__tests__/route.test.ts` que valide el listado (GET) y la creación (POST) de usuarios con sus restricciones.
 - [x] 2.2 **GREEN**: Implementar el Route Handler `/api/admin/usuarios` en `src/app/api/admin/usuarios/route.ts` para que pasen las pruebas.
 - [x] 2.3 **REFACTOR**: Optimizar y limpiar la lógica del Route Handler en `src/app/api/admin/usuarios/route.ts`.
-- [ ] 2.4 **RED**: Crear prueba de integración en `src/app/api/admin/usuarios/[id]/__tests__/route.test.ts` que valide la edición (PUT), la eliminación (DELETE) y la prevención de auto-eliminación/degradación.
-- [ ] 2.5 **GREEN**: Implementar el Route Handler en `src/app/api/admin/usuarios/[id]/route.ts` que haga pasar las pruebas.
-- [ ] 2.6 **REFACTOR**: Limpiar y tipar adecuadamente el Route Handler `/api/admin/usuarios/[id]/route.ts`.
+- [x] 2.4 **RED**: Crear prueba de integración en `src/app/api/admin/usuarios/[id]/__tests__/route.test.ts` que valide la edición (PUT), la eliminación (DELETE) y la prevención de auto-eliminación/degradación.
+- [x] 2.5 **GREEN**: Implementar el Route Handler en `src/app/api/admin/usuarios/[id]/route.ts` que haga pasar las pruebas.
+- [x] 2.6 **REFACTOR**: Limpiar y tipar adecuadamente el Route Handler `/api/admin/usuarios/[id]/route.ts`.
 
 ## Phase 3: UI & Styling
 - [ ] 3.1 Crear la interfaz del CRUD de administración en `src/app/admin/usuarios/page.tsx` con soporte para listado, buscador de usuarios y modales.
