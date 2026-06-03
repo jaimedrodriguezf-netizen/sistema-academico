@@ -1,6 +1,6 @@
 change: crud-usuarios-roles
-phase: apply
-status: in_progress
+phase: verify
+status: completed
 history:
   - phase: proposal
     status: completed
@@ -14,3 +14,6 @@ history:
   - phase: tasks
     status: completed
     timestamp: "2026-06-03T17:17:56Z"
+  - phase: apply
+    status: completed
+    timestamp: "2026-06-03T17:33:40Z"
