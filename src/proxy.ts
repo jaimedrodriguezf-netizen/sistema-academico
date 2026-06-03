@@ -20,11 +20,11 @@ export async function proxy(request: NextRequest) {
   // 2. Verificar autenticación
   const payload = token ? await verificarToken(token) : null;
 
-  // Redirección si ya está autenticado e intenta ir a login
-  if (pathname === '/login') {
+  // Redirección si ya está autenticado e intenta ir a login o admin-login
+  if (pathname === '/login' || pathname === '/admin-login') {
     if (payload) {
       if (payload.rol === 'admin') {
-        return NextResponse.redirect(new URL('/admin', request.url));
+        return NextResponse.redirect(new URL('/admin/usuarios', request.url)); // o /admin
       }
       if (payload.rol === 'docente') {
         return NextResponse.redirect(new URL('/docente', request.url));
@@ -73,5 +73,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/docente/:path*', '/padre/:path*', '/login', '/api/admin/:path*'],
+  matcher: ['/admin/:path*', '/docente/:path*', '/padre/:path*', '/login', '/admin-login', '/api/admin/:path*'],
 };

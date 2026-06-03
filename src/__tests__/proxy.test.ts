@@ -95,4 +95,19 @@ describe('Middleware Proxy: src/proxy.ts', () => {
     const body = await res.json();
     expect(body.error).toBe('No autorizado');
   });
+
+  it('debe redirigir a /admin/usuarios si intenta acceder a /admin-login estando autenticado como admin', async () => {
+    vi.mocked(verificarToken).mockResolvedValue({
+      usuarioId: 1,
+      rol: 'admin',
+      cedula: '1710034057',
+    });
+
+    const req = new NextRequest('http://localhost/admin-login');
+    req.cookies.set('session', 'token-valido');
+
+    const res = await proxy(req);
+    expect(res.status).toBe(307);
+    expect(res.headers.get('Location')).toBe('http://localhost/admin/usuarios');
+  });
 });
