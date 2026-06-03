@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm';
 import { validarCedula } from '@/lib/validador';
 import bcrypt from 'bcryptjs';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const list = await db
       .select({

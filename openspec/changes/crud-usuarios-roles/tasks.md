@@ -12,9 +12,9 @@
 - [x] 2.6 **REFACTOR**: Limpiar y tipar adecuadamente el Route Handler `/api/admin/usuarios/[id]/route.ts`.
 
 ## Phase 3: UI & Styling
-- [ ] 3.1 Crear la interfaz del CRUD de administración en `src/app/admin/usuarios/page.tsx` con soporte para listado, buscador de usuarios y modales.
-- [ ] 3.2 Crear los estilos CSS Vanilla para la interfaz de administración en `src/app/admin/usuarios/usuarios.css`.
+- [x] 3.1 Crear la interfaz del CRUD de administración en `src/app/admin/usuarios/page.tsx` con soporte para listado, buscador de usuarios y modales.
+- [x] 3.2 Crear los estilos CSS Vanilla para la interfaz de administración en `src/app/admin/usuarios/usuarios.css`.
 
 ## Phase 4: Verification & Build
-- [ ] 4.1 Ejecutar `npx tsc --noEmit` y `npm run lint` para validar que el proyecto compila limpiamente y no tiene advertencias.
-- [ ] 4.2 Ejecutar la suite completa de pruebas unitarias (`npx vitest run`) confirmando cobertura total.
+- [x] 4.1 Ejecutar `npx tsc --noEmit` y `npm run lint` para validar que el proyecto compila limpiamente y no tiene advertencias.
+- [x] 4.2 Ejecutar la suite completa de pruebas unitarias (`npx vitest run`) confirmando cobertura total.
