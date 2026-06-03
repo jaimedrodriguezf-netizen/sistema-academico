@@ -74,11 +74,13 @@ export default function EstudiantesClient() {
     if (padresRes.ok) setPadres(await padresRes.json());
   };
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     fetchEstudiantes();
     fetchSelectors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const resetForm = () => {
     setNombre(''); setCedula(''); setGenero('');

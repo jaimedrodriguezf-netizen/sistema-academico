@@ -4,7 +4,7 @@ import { db } from '@/db';
 import { estudiantes, niveles, padres, usuarios } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
     const list = await db
       .select({
