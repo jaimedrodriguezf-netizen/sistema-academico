@@ -43,6 +43,8 @@ export default function EstudiantesClient() {
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [nivelId, setNivelId] = useState('');
   const [padreId, setPadreId] = useState('');
+  const [searchPadreCedula, setSearchPadreCedula] = useState('');
+  const [selectedPadre, setSelectedPadre] = useState<Padre | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Toast
@@ -86,6 +88,8 @@ export default function EstudiantesClient() {
   const resetForm = () => {
     setNombres(''); setApellidos(''); setCedula(''); setGenero('');
     setFechaNacimiento(''); setNivelId(''); setPadreId('');
+    setSearchPadreCedula('');
+    setSelectedPadre(null);
     setErrors({});
   };
 
@@ -122,7 +126,12 @@ export default function EstudiantesClient() {
     setGenero(est.genero || '');
     setFechaNacimiento(est.fechaNacimiento ? est.fechaNacimiento.substring(0, 10) : '');
     setNivelId(String(est.nivelId));
+    
+    const currentPadre = padres.find(p => p.id === est.padreId) || null;
+    setSelectedPadre(currentPadre);
+    setSearchPadreCedula(currentPadre ? currentPadre.cedula : '');
     setPadreId(String(est.padreId));
+
     setErrors({});
     setModalOpen(true);
   };
@@ -446,19 +455,109 @@ export default function EstudiantesClient() {
                     </select>
                     {errors.nivelId && <span className="invalid-feedback">{errors.nivelId}</span>}
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="form-est-padre">Padre / Tutor *</label>
-                    <select
-                      id="form-est-padre"
-                      className="form-input"
-                      value={padreId}
-                      onChange={(e) => setPadreId(e.target.value)}
-                    >
-                      <option value="">— Seleccioná un padre —</option>
-                      {padres.map(p => (
-                        <option key={p.id} value={p.id}>{p.nombre} ({p.cedula})</option>
-                      ))}
-                    </select>
+                  <div className="form-group" style={{ position: 'relative' }}>
+                    <label htmlFor="form-est-padre-search">Buscar Padre / Tutor (por Cédula) *</label>
+                    {selectedPadre ? (
+                      <div className="selected-parent-card" style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.75rem 1rem',
+                        background: 'var(--brand-soft)',
+                        border: '1px solid var(--border-brand)',
+                        borderRadius: 'var(--r-md)',
+                        gap: '12px',
+                        marginTop: '4px'
+                      }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {selectedPadre.nombre}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                            Cédula: {selectedPadre.cedula}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          className="btn-icon"
+                          style={{ color: 'var(--danger)', padding: '4px', height: 'auto', width: 'auto' }}
+                          onClick={() => {
+                            setSelectedPadre(null);
+                            setSearchPadreCedula('');
+                            setPadreId('');
+                          }}
+                          title="Cambiar padre"
+                        >
+                          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <input
+                          type="text"
+                          id="form-est-padre-search"
+                          className="form-input"
+                          placeholder="Escribí el número de cédula..."
+                          value={searchPadreCedula}
+                          maxLength={10}
+                          onChange={(e) => setSearchPadreCedula(e.target.value.replace(/\D/g, ''))}
+                        />
+                        {searchPadreCedula.length > 0 && (
+                          <div className="autocomplete-suggestions" style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: 0,
+                            right: 0,
+                            background: 'var(--ink-900)',
+                            border: '1px solid var(--border-emphasis)',
+                            borderRadius: 'var(--r-md)',
+                            boxShadow: '0 6px 16px rgba(0,0,0,0.35)',
+                            zIndex: 1000,
+                            maxHeight: '160px',
+                            overflowY: 'auto',
+                            marginTop: '4px'
+                          }}>
+                            {padres.filter(p => p.cedula.includes(searchPadreCedula)).length === 0 ? (
+                              <div style={{ padding: '12px', fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                                 Sin resultados para &quot;{searchPadreCedula}&quot;
+                              </div>
+                            ) : (
+                              padres
+                                .filter(p => p.cedula.includes(searchPadreCedula))
+                                .map(p => (
+                                  <button
+                                    key={p.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedPadre(p);
+                                      setPadreId(String(p.id));
+                                    }}
+                                    style={{
+                                      width: '100%',
+                                      padding: '10px 12px',
+                                      background: 'transparent',
+                                      border: 'none',
+                                      borderBottom: '1px solid var(--border-soft)',
+                                      color: 'var(--text-primary)',
+                                      textAlign: 'left',
+                                      cursor: 'pointer',
+                                      display: 'block',
+                                      fontSize: '0.85rem',
+                                      transition: 'background 150ms ease'
+                                    }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--ink-700)')}
+                                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                  >
+                                    <strong>{p.nombre}</strong> <span style={{ color: 'var(--text-secondary)', marginLeft: '6px' }}>({p.cedula})</span>
+                                  </button>
+                                ))
+                            )}
+                          </div>
+                        )}
+                      </>
+                    )}
                     {errors.padreId && <span className="invalid-feedback">{errors.padreId}</span>}
                     {padres.length === 0 && (
                       <span style={{ fontSize: '0.8rem', color: 'var(--warning)', display: 'block', marginTop: '0.375rem' }}>
