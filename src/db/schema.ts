@@ -1,4 +1,4 @@
-import { mysqlTable, int, varchar, mysqlEnum, timestamp } from 'drizzle-orm/mysql-core';
+import { mysqlTable, int, varchar, mysqlEnum, timestamp, date } from 'drizzle-orm/mysql-core';
 
 export const roles = mysqlTable('roles', {
   id: int('id').primaryKey().autoincrement(),
@@ -32,9 +32,13 @@ export const padres = mysqlTable('padres', {
 
 export const estudiantes = mysqlTable('estudiantes', {
   id: int('id').primaryKey().autoincrement(),
+  cedula: varchar('cedula', { length: 10 }).unique(),
   nombre: varchar('nombre', { length: 100 }).notNull(),
+  genero: mysqlEnum('genero', ['masculino', 'femenino', 'otro']),
+  fechaNacimiento: date('fecha_nacimiento'),
   nivelId: int('nivel_id').references(() => niveles.id).notNull(),
   padreId: int('padre_id').references(() => padres.id).notNull(),
+  creadoEn: timestamp('creado_en').defaultNow(),
 });
 
 export const materias = mysqlTable('materias', {
