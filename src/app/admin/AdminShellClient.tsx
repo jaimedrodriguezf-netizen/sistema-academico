@@ -26,6 +26,17 @@ export default function AdminShellClient({ adminId, children }: AdminShellClient
     localStorage.setItem('sidebar-open', String(nextState));
   };
 
+  const handleMainClick = (e: React.MouseEvent) => {
+    if (isOpen) {
+      // Evitar cerrar si se hace clic dentro de un modal
+      if ((e.target as HTMLElement).closest('.modal-overlay')) {
+        return;
+      }
+      setIsOpen(false);
+      localStorage.setItem('sidebar-open', 'false');
+    }
+  };
+
   return (
     <div className={`admin-shell ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
       <AdminSidebar adminId={adminId} isOpen={isOpen} onToggle={handleToggle} />
@@ -42,7 +53,7 @@ export default function AdminShellClient({ adminId, children }: AdminShellClient
         </button>
       )}
 
-      <main className="admin-main">
+      <main className="admin-main" onClick={handleMainClick}>
         {children}
       </main>
     </div>

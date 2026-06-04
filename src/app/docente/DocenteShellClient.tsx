@@ -1,20 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import PadreSidebar from './PadreSidebar';
+import DocenteSidebar from './DocenteSidebar';
 
-interface PadreShellClientProps {
-  parentName: string;
+interface DocenteShellClientProps {
+  docenteName: string;
   children: React.ReactNode;
 }
 
-export default function PadreShellClient({ parentName, children }: PadreShellClientProps) {
+export default function DocenteShellClient({ docenteName, children }: DocenteShellClientProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   // Load preferences from localStorage if available
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    const saved = localStorage.getItem('sidebar-open-padre');
+    const saved = localStorage.getItem('sidebar-open-docente');
     if (saved !== null) {
       setIsOpen(saved === 'true');
     }
@@ -24,7 +24,7 @@ export default function PadreShellClient({ parentName, children }: PadreShellCli
   const handleToggle = () => {
     const nextState = !isOpen;
     setIsOpen(nextState);
-    localStorage.setItem('sidebar-open-padre', String(nextState));
+    localStorage.setItem('sidebar-open-docente', String(nextState));
   };
 
   const handleMainClick = (e: React.MouseEvent) => {
@@ -34,19 +34,19 @@ export default function PadreShellClient({ parentName, children }: PadreShellCli
         return;
       }
       setIsOpen(false);
-      localStorage.setItem('sidebar-open-padre', 'false');
+      localStorage.setItem('sidebar-open-docente', 'false');
     }
   };
 
   return (
     <div className={`admin-shell ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-      <PadreSidebar parentName={parentName} onToggle={handleToggle} />
+      <DocenteSidebar docenteName={docenteName} onToggle={handleToggle} />
       
       {!isOpen && (
         <button
           onClick={handleToggle}
           className="sidebar-open-btn-floating"
-          style={{ borderColor: 'var(--role-padre)' }}
+          style={{ borderColor: 'var(--role-docente)' }}
           aria-label="Mostrar menú"
         >
           <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">

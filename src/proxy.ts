@@ -37,7 +37,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // 3. Proteger las rutas específicas según el rol
-  const pathsProtegidos = ['/admin', '/docente', '/padre', '/api/admin'];
+  const pathsProtegidos = ['/admin', '/docente', '/padre', '/api/admin', '/api/padre', '/api/docente'];
   const pathProtegido = pathsProtegidos.find((p) => pathname.startsWith(p));
 
   if (pathProtegido) {
@@ -61,6 +61,12 @@ export async function proxy(request: NextRequest) {
     if (rutaRequerida === '/api/admin' && rolUsuario !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
+    if (rutaRequerida === '/api/padre' && rolUsuario !== 'padre') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
+    if (rutaRequerida === '/api/docente' && rolUsuario !== 'docente') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
     if (rutaRequerida === '/docente' && rolUsuario !== 'docente') {
       return NextResponse.redirect(new URL('/login', request.url));
     }
@@ -73,5 +79,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/docente/:path*', '/padre/:path*', '/login', '/admin-login', '/api/admin/:path*'],
+  matcher: ['/admin/:path*', '/docente/:path*', '/padre/:path*', '/login', '/admin-login', '/api/admin/:path*', '/api/padre/:path*', '/api/docente/:path*'],
 };

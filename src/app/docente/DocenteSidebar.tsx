@@ -4,46 +4,25 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-interface AdminSidebarProps {
-  adminId: number;
-  isOpen: boolean;
+interface DocenteSidebarProps {
+  docenteName: string;
   onToggle: () => void;
 }
 
 const navItems = [
   {
-    href: '/admin/estudiantes',
-    label: 'Estudiantes',
+    href: '/docente',
+    label: 'Registrar Asistencia',
     icon: (
       <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75"
-          d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
       </svg>
     ),
   },
   {
-    href: '/admin/usuarios',
-    label: 'Usuarios',
-    icon: (
-      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75"
-          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-  },
-  {
-    href: '/admin/materias',
-    label: 'Materias',
-    icon: (
-      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75"
-          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-      </svg>
-    ),
-  },
-  {
-    href: '/admin/reportes',
-    label: 'Reportes',
+    href: '/docente/reportes',
+    label: 'Reportes de Clase',
     icon: (
       <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75"
@@ -52,21 +31,9 @@ const navItems = [
     ),
     disabled: true,
   },
-  {
-    href: '/admin/configuracion',
-    label: 'Configuración',
-    icon: (
-      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75"
-          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-    disabled: true,
-  },
 ];
 
-export default function AdminSidebar({ adminId, onToggle }: AdminSidebarProps) {
+export default function DocenteSidebar({ docenteName, onToggle }: DocenteSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -76,12 +43,12 @@ export default function AdminSidebar({ adminId, onToggle }: AdminSidebarProps) {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
     } finally {
-      router.push('/admin-login');
+      router.push('/login');
     }
   };
 
   return (
-    <aside className="admin-sidebar" aria-label="Panel de navegación del administrador">
+    <aside className="admin-sidebar" aria-label="Navegación del portal de docentes">
       {/* Brand */}
       <div className="sidebar-brand">
         <div className="sidebar-brand-icon" aria-hidden="true">
@@ -92,7 +59,7 @@ export default function AdminSidebar({ adminId, onToggle }: AdminSidebarProps) {
         </div>
         <div className="sidebar-brand-text">
           <span className="sidebar-brand-name">SisAcadémico</span>
-          <span className="sidebar-brand-role">Panel Admin</span>
+          <span className="sidebar-brand-role" style={{ color: 'var(--role-docente)' }}>Portal Docentes</span>
         </div>
         <button
           className="sidebar-collapse-btn"
@@ -107,10 +74,10 @@ export default function AdminSidebar({ adminId, onToggle }: AdminSidebarProps) {
 
       {/* Navigation */}
       <nav className="sidebar-nav" aria-label="Navegación principal">
-        <p className="sidebar-nav-label">Gestión</p>
+        <p className="sidebar-nav-label">Académico</p>
         <ul className="sidebar-nav-list" role="list">
           {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+            const isActive = pathname === item.href;
             return (
               <li key={item.href} role="listitem">
                 {item.disabled ? (
@@ -127,11 +94,12 @@ export default function AdminSidebar({ adminId, onToggle }: AdminSidebarProps) {
                   <Link
                     href={item.href}
                     className={`sidebar-nav-item ${isActive ? 'sidebar-nav-item--active' : ''}`}
+                    style={isActive ? { color: 'var(--role-docente)', backgroundColor: 'var(--role-docente-soft)', borderColor: 'var(--role-docente)' } : {}}
                     aria-current={isActive ? 'page' : undefined}
                   >
                     {item.icon}
                     <span>{item.label}</span>
-                    {isActive && <span className="sidebar-active-dot" aria-hidden="true" />}
+                    {isActive && <span className="sidebar-active-dot" style={{ backgroundColor: 'var(--role-docente)' }} aria-hidden="true" />}
                   </Link>
                 )}
               </li>
@@ -143,15 +111,15 @@ export default function AdminSidebar({ adminId, onToggle }: AdminSidebarProps) {
       {/* Bottom: User info + Logout */}
       <div className="sidebar-footer">
         <div className="sidebar-user">
-          <div className="sidebar-user-avatar" aria-hidden="true">
+          <div className="sidebar-user-avatar" style={{ color: 'var(--role-docente)', backgroundColor: 'var(--role-docente-soft)', borderColor: 'var(--role-docente)' }} aria-hidden="true">
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
           <div className="sidebar-user-info">
-            <span className="sidebar-user-name">Admin #{adminId}</span>
-            <span className="sidebar-user-badge">Administrador</span>
+            <span className="sidebar-user-name" title={docenteName}>{docenteName}</span>
+            <span className="sidebar-user-badge" style={{ color: 'var(--role-docente)' }}>Docente</span>
           </div>
         </div>
         <button
