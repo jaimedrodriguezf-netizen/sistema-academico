@@ -15,6 +15,16 @@ vi.mock('@/db', () => ({
   },
 }));
 
+vi.mock('@/lib/auth', () => ({
+  verificarToken: vi.fn().mockResolvedValue({ usuarioId: 1, rol: 'admin' }),
+}));
+
+vi.mock('next/headers', () => ({
+  cookies: vi.fn().mockReturnValue({
+    get: vi.fn().mockReturnValue({ value: 'session-token' }),
+  }),
+}));
+
 describe('API Route Handler: GET and POST /api/admin/usuarios', () => {
   beforeEach(() => {
     vi.clearAllMocks();

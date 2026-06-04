@@ -72,6 +72,21 @@ describe('API Route Handler: PUT and DELETE /api/admin/usuarios/[id]', () => {
         set: mockSet,
       });
 
+      // Mock de select para verificar docente existente
+      const mockSelectWhere = vi.fn().mockResolvedValue([{ id: 10, usuarioId: 2 }]);
+      const mockSelectFrom = vi.fn().mockReturnValue({
+        where: mockSelectWhere,
+      });
+      mockSelect.mockReturnValue({
+        from: mockSelectFrom,
+      });
+
+      // Mock de delete para limpiar asignaciones del docente
+      const mockDeleteWhere = vi.fn().mockResolvedValue([{ affectedRows: 1 }]);
+      mockDelete.mockReturnValue({
+        where: mockDeleteWhere,
+      });
+
       const req = new NextRequest('http://localhost/api/admin/usuarios/2', {
         method: 'PUT',
         body: JSON.stringify({

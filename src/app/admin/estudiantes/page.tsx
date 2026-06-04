@@ -1,6 +1,6 @@
 import EstudiantesClient from './EstudiantesClient';
-import '../usuarios/usuarios.css';
-import './estudiantes.css';
+import '@/app/styles/usuarios.css';
+import '@/app/styles/estudiantes.css';
 
 export const metadata = {
   title: 'Estudiantes | Panel Administrativo',

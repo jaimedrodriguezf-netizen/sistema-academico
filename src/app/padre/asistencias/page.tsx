@@ -7,25 +7,22 @@ import { eq, inArray, desc } from 'drizzle-orm';
 import AsistenciasClient from './AsistenciasClient';
 
 // Import shared CSS for visual style coherence
-import '../../admin/usuarios/usuarios.css';
-import '../../admin/estudiantes/estudiantes.css';
+import '@/app/styles/usuarios.css';
+import '@/app/styles/estudiantes.css';
 
 export const metadata = {
   title: 'Control de Asistencias | Portal de Padres',
   description: 'Control y seguimiento de asistencias por materia de representados',
 };
 
-export async function generateStaticParams() {
-  return [];
-}
 
 export default async function AsistenciasPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get('session')?.value;
   const user = token ? await verificarToken(token) : null;
 
-  if (!user || user.rol !== 'padre') {
-    redirect('/login');
+  if (!user) {
+    return null;
   }
 
   // 1. Obtener registro de padre asociado al usuario

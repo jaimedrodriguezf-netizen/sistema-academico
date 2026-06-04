@@ -6,8 +6,8 @@ import { estudiantes, niveles, padres, usuarios } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 // Import shared CSS for dashboard, tables and badges
-import '../admin/usuarios/usuarios.css';
-import '../admin/estudiantes/estudiantes.css';
+import '@/app/styles/usuarios.css';
+import '@/app/styles/estudiantes.css';
 
 export const metadata = {
   title: 'Mi Panel | Portal de Padres',
@@ -19,8 +19,8 @@ export default async function PadrePage() {
   const token = cookieStore.get('session')?.value;
   const user = token ? await verificarToken(token) : null;
 
-  if (!user || user.rol !== 'padre') {
-    redirect('/login');
+  if (!user) {
+    return null;
   }
 
   // 1. Obtener datos del usuario desde la DB para el nombre real

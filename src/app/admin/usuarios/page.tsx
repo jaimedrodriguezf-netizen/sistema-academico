@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { verificarToken } from '@/lib/auth';
 import UsuariosClient from './UsuariosClient';
-import './usuarios.css';
+import '@/app/styles/usuarios.css';
 
 export const metadata = {
   title: 'Usuarios | Panel Administrativo',
