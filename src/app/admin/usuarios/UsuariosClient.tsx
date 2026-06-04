@@ -17,45 +17,42 @@ interface UsuariosClientProps {
   adminId?: number;
 }
 
+const ROL_COLORS: Record<number, string> = {
+  1: 'var(--role-admin)',
+  2: 'var(--role-docente)',
+  3: 'var(--role-padre)',
+};
+
 export default function UsuariosClient({ adminId }: UsuariosClientProps) {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [rolFilter, setRolFilter] = useState('');
-  
+
   // Modal states
   const [modalOpen, setModalOpen] = useState(false);
   const [editingUsuario, setEditingUsuario] = useState<Usuario | null>(null);
-  
-  // Form states
+
+  // Form states — rol PRIMERO
+  const [rolId, setRolId] = useState(2);
   const [cedula, setCedula] = useState('');
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
-  const [rolId, setRolId] = useState(2); // Docente por defecto
-  
-  // Validation errors
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  
-  // Toast notifications
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'danger' } | null>(null);
 
   const showToast = (message: string, type: 'success' | 'danger') => {
     setToast({ message, type });
-    setTimeout(() => {
-      setToast(null);
-    }, 4000);
+    setTimeout(() => setToast(null), 4000);
   };
 
   const fetchUsuarios = async () => {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/usuarios');
-      if (res.ok) {
-        const data = await res.json();
-        setUsuarios(data);
-      } else {
-        showToast('Error al cargar la lista de usuarios', 'danger');
-      }
+      if (res.ok) setUsuarios(await res.json());
+      else showToast('Error al cargar la lista de usuarios', 'danger');
     } catch {
       showToast('Error de conexión al cargar usuarios', 'danger');
     } finally {
@@ -70,29 +67,33 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  const openAddModal = () => {
-    setEditingUsuario(null);
+  const resetForm = () => {
+    setRolId(2);
     setCedula('');
     setNombre('');
     setEmail('');
-    setRolId(2);
     setErrors({});
+  };
+
+  const openAddModal = () => {
+    setEditingUsuario(null);
+    resetForm();
     setModalOpen(true);
   };
 
   const openEditModal = (usuario: Usuario) => {
     setEditingUsuario(usuario);
+    setRolId(usuario.rolId);
     setCedula(usuario.cedula);
     setNombre(usuario.nombre);
     setEmail(usuario.email || '');
-    setRolId(usuario.rolId);
     setErrors({});
     setModalOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors: { [key: string]: string } = {};
+    const newErrors: Record<string, string> = {};
 
     if (!cedula.trim()) {
       newErrors.cedula = 'La cédula es requerida';
@@ -100,9 +101,7 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
       newErrors.cedula = 'La cédula ecuatoriana ingresada no es válida';
     }
 
-    if (!nombre.trim()) {
-      newErrors.nombre = 'El nombre es requerido';
-    }
+    if (!nombre.trim()) newErrors.nombre = 'El nombre es requerido';
 
     if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = 'El formato del correo electrónico no es válido';
@@ -115,13 +114,11 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
 
     try {
       if (editingUsuario) {
-        // Editar
         const res = await fetch(`/api/admin/usuarios/${editingUsuario.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ nombre, email, rolId }),
         });
-
         if (res.ok) {
           showToast('Usuario actualizado correctamente', 'success');
           setModalOpen(false);
@@ -131,13 +128,11 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
           showToast(errData.error || 'Error al actualizar usuario', 'danger');
         }
       } else {
-        // Crear
         const res = await fetch('/api/admin/usuarios', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ cedula, nombre, email, rolId }),
         });
-
         if (res.ok) {
           showToast('Usuario creado correctamente', 'success');
           setModalOpen(false);
@@ -157,16 +152,10 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
       showToast('No puedes eliminar tu propia cuenta de administrador', 'danger');
       return;
     }
-
-    if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente a "${usuarioNombre}"?`)) {
-      return;
-    }
+    if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente a "${usuarioNombre}"?`)) return;
 
     try {
-      const res = await fetch(`/api/admin/usuarios/${id}`, {
-        method: 'DELETE',
-      });
-
+      const res = await fetch(`/api/admin/usuarios/${id}`, { method: 'DELETE' });
       if (res.ok) {
         showToast('Usuario eliminado correctamente', 'success');
         fetchUsuarios();
@@ -179,14 +168,12 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
     }
   };
 
-  // Filter & Search users
   const filteredUsuarios = usuarios.filter((u) => {
     const query = search.toLowerCase();
     const matchesSearch =
       u.nombre.toLowerCase().includes(query) ||
       u.cedula.includes(query) ||
       (u.email && u.email.toLowerCase().includes(query));
-      
     const matchesRol = rolFilter === '' || u.rolId === Number(rolFilter);
     return matchesSearch && matchesRol;
   });
@@ -214,7 +201,7 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
         </button>
       </header>
 
-      {/* Controles: Búsqueda y Filtros */}
+      {/* Controles */}
       <section className="controls-bar">
         <div className="search-input-wrapper">
           <svg className="search-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -229,7 +216,6 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
             id="input-search"
           />
         </div>
-
         <select
           className="filter-select"
           value={rolFilter}
@@ -269,13 +255,18 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
                 <tr key={user.id}>
                   <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{user.cedula}</td>
                   <td style={{ fontWeight: 500 }}>
-                    {user.nombre} {user.id === adminId && <span style={{ color: 'var(--admin-primary)', fontSize: '0.8rem' }}>(Vos)</span>}
+                    {user.nombre}{' '}
+                    {user.id === adminId && (
+                      <span style={{ color: 'var(--admin-primary)', fontSize: '0.8rem' }}>(Vos)</span>
+                    )}
                   </td>
-                  <td>{user.email || <span style={{ color: 'var(--admin-text-muted)', fontStyle: 'italic' }}>Sin correo</span>}</td>
                   <td>
-                    <span className={`badge badge-${user.rol}`}>
-                      {user.rol}
-                    </span>
+                    {user.email || (
+                      <span style={{ color: 'var(--admin-text-muted)', fontStyle: 'italic' }}>Sin correo</span>
+                    )}
+                  </td>
+                  <td>
+                    <span className={`badge badge-${user.rol}`}>{user.rol}</span>
                   </td>
                   <td>
                     <div className="actions-cell">
@@ -293,7 +284,7 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
                         className="btn-icon btn-icon-delete"
                         onClick={() => handleDelete(user.id, user.nombre)}
                         disabled={user.id === adminId}
-                        title={user.id === adminId ? "No puedes eliminarte a ti mismo" : "Eliminar usuario"}
+                        title={user.id === adminId ? 'No puedes eliminarte a ti mismo' : 'Eliminar usuario'}
                         id={`btn-delete-${user.id}`}
                       >
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -312,17 +303,70 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
       {/* Modal de Registro / Edición */}
       {modalOpen && (
         <div className="modal-overlay" id="modal-form-user">
-          <div className="modal-content">
+          <div className="modal-content" style={{ maxWidth: '480px' }}>
             <header className="modal-header">
               <h2>{editingUsuario ? 'Modificar Usuario' : 'Registrar Nuevo Usuario'}</h2>
-              <button className="btn-icon" onClick={() => setModalOpen(false)}>
+              <button className="btn-icon" onClick={() => setModalOpen(false)} aria-label="Cerrar">
                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
               </button>
             </header>
+
             <form onSubmit={handleSave}>
               <div className="modal-body">
+
+                {/* ── 1. ROL (primero, pill buttons) ─────────────────── */}
+                <div className="form-group">
+                  <label>Rol del Usuario</label>
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                    {[
+                      { id: 1, label: 'Administrador', icon: '🛡️' },
+                      { id: 2, label: 'Docente', icon: '👨‍🏫' },
+                      { id: 3, label: 'Padre / Tutor', icon: '👪' },
+                    ].map((r) => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => setRolId(r.id)}
+                        disabled={editingUsuario?.id === adminId && r.id !== 1}
+                        style={{
+                          flex: 1,
+                          padding: '12px 8px',
+                          borderRadius: 'var(--r-md)',
+                          border: `2px solid ${rolId === r.id ? ROL_COLORS[r.id] : 'var(--border-std)'}`,
+                          background:
+                            rolId === r.id
+                              ? `rgba(${r.id === 1 ? '99,102,241' : r.id === 2 ? '16,185,129' : '245,158,11'}, 0.10)`
+                              : 'var(--ink-950)',
+                          color: rolId === r.id ? ROL_COLORS[r.id] : 'var(--text-secondary)',
+                          fontWeight: rolId === r.id ? 700 : 500,
+                          fontSize: '0.82rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                          opacity: editingUsuario?.id === adminId && r.id !== 1 ? 0.4 : 1,
+                        }}
+                      >
+                        <span style={{ fontSize: '1.4rem' }}>{r.icon}</span>
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+                  {editingUsuario?.id === adminId && (
+                    <span style={{ fontSize: '0.8rem', color: 'var(--admin-warning)', display: 'block', marginTop: '0.4rem' }}>
+                      No podés cambiar tu propio rol de administrador.
+                    </span>
+                  )}
+                </div>
+
+                {/* Separator */}
+                <div style={{ height: '1px', background: 'var(--border-soft)', margin: '4px 0 12px' }} />
+
+                {/* ── 2. Cédula ─────────────────────────────────────── */}
                 <div className="form-group">
                   <label htmlFor="form-cedula">Número de Cédula (Ecuatoriana)</label>
                   <input
@@ -338,6 +382,7 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
                   {errors.cedula && <span className="invalid-feedback">{errors.cedula}</span>}
                 </div>
 
+                {/* ── 3. Nombre ─────────────────────────────────────── */}
                 <div className="form-group">
                   <label htmlFor="form-nombre">Nombre y Apellido completo</label>
                   <input
@@ -346,11 +391,12 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
                     className="form-input"
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
-                    placeholder="Ej: Juan Pérez"
+                    placeholder={rolId === 2 ? 'Ej: Prof. Ana García' : 'Ej: Juan Pérez'}
                   />
                   {errors.nombre && <span className="invalid-feedback">{errors.nombre}</span>}
                 </div>
 
+                {/* ── 4. Email ──────────────────────────────────────── */}
                 <div className="form-group">
                   <label htmlFor="form-email">Correo Electrónico (Opcional)</label>
                   <input
@@ -364,32 +410,34 @@ export default function UsuariosClient({ adminId }: UsuariosClientProps) {
                   {errors.email && <span className="invalid-feedback">{errors.email}</span>}
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="form-rol">Rol del Usuario</label>
-                  <select
-                    id="form-rol"
-                    className="form-input"
-                    value={rolId}
-                    onChange={(e) => setRolId(Number(e.target.value))}
-                    disabled={editingUsuario?.id === adminId}
-                  >
-                    <option value="1">Administrador</option>
-                    <option value="2">Docente</option>
-                    <option value="3">Padre de Familia</option>
-                  </select>
-                  {editingUsuario?.id === adminId && (
-                    <span style={{ fontSize: '0.8rem', color: 'var(--admin-warning)', display: 'block', marginTop: '0.35rem' }}>
-                      No podés cambiar tu propio rol de administrador.
-                    </span>
-                  )}
-                </div>
-                
+                {/* Hint para docentes */}
+                {rolId === 2 && (
+                  <div style={{
+                    padding: '10px 14px',
+                    background: 'var(--role-docente-soft)',
+                    border: '1px solid rgba(16,185,129,0.25)',
+                    borderRadius: 'var(--r-md)',
+                    fontSize: '0.82rem',
+                    color: 'var(--role-docente)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginTop: '4px',
+                  }}>
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Para asignar materias y niveles al docente, usá el módulo <strong>Materias</strong> del menú lateral.
+                  </div>
+                )}
+
                 {!editingUsuario && (
-                  <p style={{ fontSize: '0.8rem', color: 'var(--admin-text-muted)', fontStyle: 'italic', marginTop: '1rem' }}>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--admin-text-muted)', fontStyle: 'italic', marginTop: '12px' }}>
                     * La contraseña inicial por defecto del usuario será su número de cédula.
                   </p>
                 )}
               </div>
+
               <footer className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>
                   Cancelar

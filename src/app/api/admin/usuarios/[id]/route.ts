@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { db } from '@/db';
-import { usuarios } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { usuarios, docentes, padres, docentesMaterias } from '@/db/schema';
+import { eq, and } from 'drizzle-orm';
 import { cookies } from 'next/headers';
 import { verificarToken } from '@/lib/auth';
 
@@ -49,14 +49,83 @@ export async function PUT(
       );
     }
 
+    const newRolIdNum = Number(rolId);
+    if (![1, 2, 3].includes(newRolIdNum)) {
+      return NextResponse.json(
+        { error: 'Rol inválido' },
+        { status: 400 }
+      );
+    }
+
     await db
       .update(usuarios)
       .set({
         nombre,
         email: email || null,
-        rolId: Number(rolId),
+        rolId: newRolIdNum,
       })
       .where(eq(usuarios.id, targetUserId));
+
+    // Sincronizar tablas auxiliares
+    const { docenteMaterias: materiasAsignadas } = body;
+
+    if (newRolIdNum === 2) {
+      // Es docente, verificar si existe en docentes
+      let existingDocente = await db.select().from(docentes).where(eq(docentes.usuarioId, targetUserId));
+      if (existingDocente.length === 0) {
+        await db.insert(docentes).values({ usuarioId: targetUserId });
+        existingDocente = await db.select().from(docentes).where(eq(docentes.usuarioId, targetUserId));
+      }
+      const docenteId = existingDocente[0]?.id;
+
+      // Limpiar asignaciones previas de este docente
+      if (docenteId) {
+        await db.delete(docentesMaterias).where(eq(docentesMaterias.docenteId, docenteId));
+
+        // Insertar las nuevas asignaciones
+        if (Array.isArray(materiasAsignadas)) {
+          for (const dm of materiasAsignadas) {
+            // Evitar colisión de restricción de unicidad eliminando asignación previa para esa materia y nivel
+            await db.delete(docentesMaterias).where(
+              and(
+                eq(docentesMaterias.materiaId, Number(dm.materiaId)),
+                eq(docentesMaterias.nivelId, Number(dm.nivelId))
+              )
+            );
+
+            await db.insert(docentesMaterias).values({
+              docenteId,
+              materiaId: Number(dm.materiaId),
+              nivelId: Number(dm.nivelId),
+            });
+          }
+        }
+      }
+      
+      // Eliminar de padres si existía
+      await db.delete(padres).where(eq(padres.usuarioId, targetUserId));
+    } else if (newRolIdNum === 3) {
+      // Es padre, verificar si existe en padres
+      const existingPadre = await db.select().from(padres).where(eq(padres.usuarioId, targetUserId));
+      if (existingPadre.length === 0) {
+        await db.insert(padres).values({ usuarioId: targetUserId });
+      }
+      
+      // Limpiar de docentes y sus materias si existía
+      const existingDocente = await db.select().from(docentes).where(eq(docentes.usuarioId, targetUserId));
+      if (existingDocente.length > 0) {
+        await db.delete(docentesMaterias).where(eq(docentesMaterias.docenteId, existingDocente[0].id));
+      }
+      await db.delete(docentes).where(eq(docentes.usuarioId, targetUserId));
+    } else {
+      // Otro rol (e.g. admin), eliminar de ambos
+      const existingDocente = await db.select().from(docentes).where(eq(docentes.usuarioId, targetUserId));
+      if (existingDocente.length > 0) {
+        await db.delete(docentesMaterias).where(eq(docentesMaterias.docenteId, existingDocente[0].id));
+      }
+      await db.delete(docentes).where(eq(docentes.usuarioId, targetUserId));
+      await db.delete(padres).where(eq(padres.usuarioId, targetUserId));
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -88,6 +157,10 @@ export async function DELETE(
         { status: 400 }
       );
     }
+
+    // Eliminar primero de tablas auxiliares para evitar errores de clave foránea
+    await db.delete(docentes).where(eq(docentes.usuarioId, targetUserId));
+    await db.delete(padres).where(eq(padres.usuarioId, targetUserId));
 
     await db.delete(usuarios).where(eq(usuarios.id, targetUserId));
 
