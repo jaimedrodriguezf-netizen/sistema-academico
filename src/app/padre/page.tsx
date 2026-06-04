@@ -1,6 +1,5 @@
 import { cookies } from 'next/headers';
 import { verificarToken } from '@/lib/auth';
-import { redirect } from 'next/navigation';
 import { db } from '@/db';
 import { estudiantes, niveles, padres, usuarios } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -20,7 +19,7 @@ export default async function PadrePage() {
   const user = token ? await verificarToken(token) : null;
 
   if (!user) {
-    return null;
+    throw new Error('No autorizado');
   }
 
   // 1. Obtener datos del usuario desde la DB para el nombre real

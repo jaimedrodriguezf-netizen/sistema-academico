@@ -1,6 +1,5 @@
 import { cookies } from 'next/headers';
 import { verificarToken } from '@/lib/auth';
-import { redirect } from 'next/navigation';
 import { db } from '@/db';
 import { estudiantes, niveles, padres, asistencias, materias, docentesMaterias } from '@/db/schema';
 import { eq, inArray, desc } from 'drizzle-orm';
@@ -22,7 +21,7 @@ export default async function AsistenciasPage() {
   const user = token ? await verificarToken(token) : null;
 
   if (!user) {
-    return null;
+    throw new Error('No autorizado');
   }
 
   // 1. Obtener registro de padre asociado al usuario

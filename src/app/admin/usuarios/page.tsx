@@ -10,10 +10,17 @@ export const metadata = {
 export default async function AdminUsuariosPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get('session')?.value;
-  // El layout padre ya validó el token — lo leemos solo para obtener el adminId
-  const admin = await verificarToken(token!);
+
+  if (!token) {
+    throw new Error('No session token');
+  }
+
+  const admin = await verificarToken(token);
+  if (!admin) {
+    throw new Error('Invalid session');
+  }
 
   return (
-    <UsuariosClient adminId={admin!.usuarioId} />
+    <UsuariosClient adminId={admin.usuarioId} />
   );
 }
