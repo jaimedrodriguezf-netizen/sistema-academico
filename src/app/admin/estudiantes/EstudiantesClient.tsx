@@ -1,6 +1,43 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+
+const PAGE_SIZE = 15;
+
+function Pagination({
+  page, totalPages, onPage,
+}: { page: number; totalPages: number; onPage: (p: number) => void }) {
+  if (totalPages <= 1) return null;
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  return (
+    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'center', padding: '20px 0 4px' }}>
+      <button onClick={() => onPage(page - 1)} disabled={page === 1} className="btn-icon"
+        style={{ opacity: page === 1 ? 0.35 : 1 }} aria-label="Anterior">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      {pages.map((p) => (
+        <button key={p} onClick={() => onPage(p)} style={{
+          minWidth: '34px', height: '34px', borderRadius: 'var(--r-md)',
+          border: `1.5px solid ${p === page ? 'var(--brand)' : 'var(--border-std)'}`,
+          background: p === page ? 'var(--brand-soft)' : 'var(--ink-950)',
+          color: p === page ? 'var(--brand)' : 'var(--text-secondary)',
+          fontWeight: p === page ? 700 : 500, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.15s',
+        }}>{p}</button>
+      ))}
+      <button onClick={() => onPage(page + 1)} disabled={page === totalPages} className="btn-icon"
+        style={{ opacity: page === totalPages ? 0.35 : 1 }} aria-label="Siguiente">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
+        Página {page} de {totalPages}
+      </span>
+    </div>
+  );
+}
 
 interface Nivel { id: number; nombre: string; }
 interface Padre { id: number; nombre: string; cedula: string; }
@@ -23,13 +60,23 @@ const GENERO_LABELS: Record<string, string> = {
   otro: 'Otro',
 };
 
+interface Stats { total: number; masculino: number; femenino: number; niveles: number; }
+
 export default function EstudiantesClient() {
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
+  const [stats, setStats] = useState<Stats>({ total: 0, masculino: 0, femenino: 0, niveles: 0 });
+  const [totalFiltered, setTotalFiltered] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [hasSearched, setHasSearched] = useState(false);
+
   const [niveles, setNiveles] = useState<Nivel[]>([]);
   const [padres, setPadres] = useState<Padre[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [nivelFilter, setNivelFilter] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Modal
   const [modalOpen, setModalOpen] = useState(false);
@@ -55,18 +102,43 @@ export default function EstudiantesClient() {
     setTimeout(() => setToast(null), 4000);
   };
 
-  const fetchEstudiantes = async () => {
+  // Debounce search
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedSearch(value), 350);
+  };
+
+  const fetchEstudiantes = useCallback(async (p: number, searchQ: string, nivelId: string) => {
+    // Search-first: no disparar si no hay filtro activo
+    if (!searchQ && !nivelId) {
+      setEstudiantes([]);
+      setHasSearched(false);
+      return;
+    }
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/estudiantes');
-      if (res.ok) setEstudiantes(await res.json());
-      else showToast('Error al cargar estudiantes', 'danger');
+      setHasSearched(true);
+      const params = new URLSearchParams({ page: String(p), limit: String(PAGE_SIZE) });
+      if (searchQ) params.set('search', searchQ);
+      if (nivelId) params.set('nivelId', nivelId);
+      const res = await fetch(`/api/admin/estudiantes?${params}`);
+      if (res.ok) {
+        const json = await res.json();
+        setEstudiantes(json.data);
+        setTotalFiltered(json.total);
+        setTotalPages(json.totalPages);
+        setPage(json.page);
+        if (json.stats) setStats(json.stats);
+      } else {
+        showToast('Error al cargar estudiantes', 'danger');
+      }
     } catch {
       showToast('Error de conexión', 'danger');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const fetchSelectors = async () => {
     const [nivelesRes, padresRes] = await Promise.all([
@@ -79,11 +151,19 @@ export default function EstudiantesClient() {
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    fetchEstudiantes();
     fetchSelectors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    fetchEstudiantes(1, debouncedSearch, nivelFilter);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch, nivelFilter]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  const handlePageChange = (p: number) => fetchEstudiantes(p, debouncedSearch, nivelFilter);
 
   const resetForm = () => {
     setNombres(''); setApellidos(''); setCedula(''); setGenero('');
@@ -96,10 +176,11 @@ export default function EstudiantesClient() {
   const openAddModal = () => {
     setEditingEstudiante(null);
     resetForm();
+    fetchSelectors(); // Refrescar selectores al abrir
     setModalOpen(true);
   };
 
-  const openEditModal = (est: Estudiante) => {
+  const openEditModal = async (est: Estudiante) => {
     setEditingEstudiante(est);
     
     // Split full name into names and last names
@@ -127,11 +208,34 @@ export default function EstudiantesClient() {
     setFechaNacimiento(est.fechaNacimiento ? est.fechaNacimiento.substring(0, 10) : '');
     setNivelId(String(est.nivelId));
     
-    const currentPadre = padres.find(p => p.id === est.padreId) || null;
-    setSelectedPadre(currentPadre);
-    setSearchPadreCedula(currentPadre ? currentPadre.cedula : '');
-    setPadreId(String(est.padreId));
+    // Refrescar selectores para asegurar datos actualizados
+    try {
+      const [nivelesRes, padresRes] = await Promise.all([
+        fetch('/api/admin/niveles'),
+        fetch('/api/admin/padres'),
+      ]);
+      if (nivelesRes.ok) {
+        const freshNiveles = await nivelesRes.json();
+        setNiveles(freshNiveles);
+      }
+      if (padresRes.ok) {
+        const freshPadres = await padresRes.json();
+        setPadres(freshPadres);
+        const currentPadre = freshPadres.find((p: { id: number; nombre: string; cedula: string }) => p.id === est.padreId) || null;
+        setSelectedPadre(currentPadre);
+        setSearchPadreCedula(currentPadre ? currentPadre.cedula : '');
+      } else {
+        const currentPadre = padres.find(p => p.id === est.padreId) || null;
+        setSelectedPadre(currentPadre);
+        setSearchPadreCedula(currentPadre ? currentPadre.cedula : '');
+      }
+    } catch {
+      const currentPadre = padres.find(p => p.id === est.padreId) || null;
+      setSelectedPadre(currentPadre);
+      setSearchPadreCedula(currentPadre ? currentPadre.cedula : '');
+    }
 
+    setPadreId(String(est.padreId));
     setErrors({});
     setModalOpen(true);
   };
@@ -183,7 +287,7 @@ export default function EstudiantesClient() {
         'success'
       );
       setModalOpen(false);
-      fetchEstudiantes();
+      fetchEstudiantes(page, debouncedSearch, nivelFilter);
     } catch {
       showToast('Error de conexión al guardar', 'danger');
     }
@@ -200,21 +304,14 @@ export default function EstudiantesClient() {
         return;
       }
       showToast('Estudiante eliminado', 'success');
-      fetchEstudiantes();
+      fetchEstudiantes(page, debouncedSearch, nivelFilter);
     } catch {
       showToast('Error de conexión al eliminar', 'danger');
     }
   };
 
-  const filtered = estudiantes.filter((est) => {
-    const q = search.toLowerCase();
-    const matchSearch =
-      est.nombre.toLowerCase().includes(q) ||
-      (est.cedula && est.cedula.includes(q)) ||
-      est.padreNombre.toLowerCase().includes(q);
-    const matchNivel = nivelFilter === '' || est.nivelId === Number(nivelFilter);
-    return matchSearch && matchNivel;
-  });
+  // Data is already filtered server-side
+  const filtered = estudiantes;
 
   return (
     <div className="page-content">
@@ -242,19 +339,19 @@ export default function EstudiantesClient() {
       {/* Estadísticas rápidas */}
       <div className="stats-row">
         <div className="stat-card">
-          <span className="stat-value">{estudiantes.length}</span>
+          <span className="stat-value">{stats.total}</span>
           <span className="stat-label">Total estudiantes</span>
         </div>
         <div className="stat-card">
-          <span className="stat-value">{estudiantes.filter(e => e.genero === 'masculino').length}</span>
+          <span className="stat-value">{stats.masculino}</span>
           <span className="stat-label">Varones</span>
         </div>
         <div className="stat-card">
-          <span className="stat-value">{estudiantes.filter(e => e.genero === 'femenino').length}</span>
+          <span className="stat-value">{stats.femenino}</span>
           <span className="stat-label">Mujeres</span>
         </div>
         <div className="stat-card">
-          <span className="stat-value">{new Set(estudiantes.map(e => e.nivelId)).size}</span>
+          <span className="stat-value">{stats.niveles}</span>
           <span className="stat-label">Niveles activos</span>
         </div>
       </div>
@@ -270,7 +367,7 @@ export default function EstudiantesClient() {
             className="search-input"
             placeholder="Buscar por nombre, cédula o padre..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             id="input-search-estudiante"
           />
         </div>
@@ -290,12 +387,26 @@ export default function EstudiantesClient() {
       {/* Tabla */}
       <section className="table-wrapper">
         {loading ? (
-          <div className="table-empty">Cargando estudiantes…</div>
+          <div style={{ padding: '3rem', textAlign: 'center' }}>
+            <div className="skeleton-loader" style={{ margin: '0 auto', width: '60px', height: '60px', borderRadius: '50%' }} />
+            <p style={{ color: 'var(--text-muted)', marginTop: '1rem', fontSize: '0.9rem' }}>Buscando…</p>
+          </div>
+        ) : !hasSearched ? (
+          <div className="table-empty" style={{ padding: '3rem' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔍</div>
+            <p style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>
+              Buscá un estudiante
+            </p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Escribí el nombre, cédula o padre, o filtrá por nivel para ver resultados.
+            </p>
+          </div>
         ) : filtered.length === 0 ? (
           <div className="table-empty">
-            {search || nivelFilter ? 'Sin resultados para la búsqueda.' : 'No hay estudiantes registrados aún.'}
+            Sin resultados para tu búsqueda.
           </div>
         ) : (
+          <>
           <table className="admin-table">
             <thead>
               <tr>
@@ -352,6 +463,13 @@ export default function EstudiantesClient() {
               ))}
             </tbody>
           </table>
+          <Pagination page={page} totalPages={totalPages} onPage={handlePageChange} />
+          {totalFiltered > 0 && (
+            <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', paddingBottom: '8px' }}>
+              {totalFiltered} resultado{totalFiltered !== 1 ? 's' : ''} encontrado{totalFiltered !== 1 ? 's' : ''}
+            </p>
+          )}
+          </>
         )}
       </section>
 

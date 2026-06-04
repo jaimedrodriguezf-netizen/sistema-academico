@@ -2,10 +2,39 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { db } from '@/db';
 import { estudiantes, niveles, padres, usuarios } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, like, and, sql, or } from 'drizzle-orm';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, Number(searchParams.get('page') || 1));
+    const limit = Math.min(50, Math.max(1, Number(searchParams.get('limit') || 15)));
+    const offset = (page - 1) * limit;
+    const search = searchParams.get('search') || '';
+    const filterNivelId = searchParams.get('nivelId');
+
+    const conditions = [];
+    if (filterNivelId) conditions.push(eq(estudiantes.nivelId, Number(filterNivelId)));
+    if (search) {
+      conditions.push(
+        or(
+          like(estudiantes.nombre, `%${search}%`),
+          like(estudiantes.cedula, `%${search}%`),
+          like(usuarios.nombre, `%${search}%`)
+        )
+      );
+    }
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const [{ total }] = await db
+      .select({ total: sql<number>`count(*)` })
+      .from(estudiantes)
+      .innerJoin(niveles, eq(estudiantes.nivelId, niveles.id))
+      .innerJoin(padres, eq(estudiantes.padreId, padres.id))
+      .innerJoin(usuarios, eq(padres.usuarioId, usuarios.id))
+      .$dynamic()
+      .where(whereClause);
+
     const list = await db
       .select({
         id: estudiantes.id,
@@ -22,14 +51,42 @@ export async function GET() {
       .from(estudiantes)
       .innerJoin(niveles, eq(estudiantes.nivelId, niveles.id))
       .innerJoin(padres, eq(estudiantes.padreId, padres.id))
-      .innerJoin(usuarios, eq(padres.usuarioId, usuarios.id));
+      .innerJoin(usuarios, eq(padres.usuarioId, usuarios.id))
+      .orderBy(estudiantes.nombre)
+      .$dynamic()
+      .where(whereClause)
+      .limit(limit)
+      .offset(offset);
 
-    return NextResponse.json(list);
+    // Totals for stats (always full count, no filters)
+    const [stats] = await db
+      .select({
+        total: sql<number>`count(*)`,
+        masculino: sql<number>`sum(case when ${estudiantes.genero} = 'masculino' then 1 else 0 end)`,
+        femenino: sql<number>`sum(case when ${estudiantes.genero} = 'femenino' then 1 else 0 end)`,
+        niveles: sql<number>`count(distinct ${estudiantes.nivelId})`,
+      })
+      .from(estudiantes);
+
+    return NextResponse.json({
+      data: list,
+      total: Number(total),
+      page,
+      totalPages: Math.ceil(Number(total) / limit),
+      limit,
+      stats: {
+        total: Number(stats.total),
+        masculino: Number(stats.masculino || 0),
+        femenino: Number(stats.femenino || 0),
+        niveles: Number(stats.niveles || 0),
+      },
+    });
   } catch (error) {
     console.error('Error al listar estudiantes:', error);
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
+
 
 export async function POST(request: NextRequest) {
   try {
