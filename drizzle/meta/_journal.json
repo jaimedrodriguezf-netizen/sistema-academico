@@ -15,6 +15,20 @@
       "when": 1780514320326,
       "tag": "0001_slim_siren",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1780531889395,
+      "tag": "0002_nasty_ben_urich",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1780534231948,
+      "tag": "0003_hesitant_talkback",
+      "breakpoints": true
     }
   ]
 }

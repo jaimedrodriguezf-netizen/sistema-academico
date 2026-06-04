@@ -1,0 +1,1 @@
+ALTER TABLE `asistencias` MODIFY COLUMN `materia_id` int NOT NULL;

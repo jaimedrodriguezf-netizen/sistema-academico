@@ -52,3 +52,13 @@ export const docentesMaterias = mysqlTable('docentes_materias', {
   materiaId: int('materia_id').references(() => materias.id).notNull(),
   nivelId: int('nivel_id').references(() => niveles.id).notNull(),
 });
+
+export const asistencias = mysqlTable('asistencias', {
+  id: int('id').primaryKey().autoincrement(),
+  estudianteId: int('estudiante_id').references(() => estudiantes.id).notNull(),
+  fecha: date('fecha').notNull(),
+  estado: mysqlEnum('estado', ['presente', 'ausente', 'atraso', 'justificado']).notNull(),
+  materiaId: int('materia_id').references(() => materias.id).notNull(),
+  observacion: varchar('observacion', { length: 255 }),
+  creadoEn: timestamp('creado_en').defaultNow(),
+});
