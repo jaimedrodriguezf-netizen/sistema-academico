@@ -71,12 +71,14 @@ export async function PUT(
 
     if (newRolIdNum === 2) {
       // Es docente, verificar si existe en docentes
-      let existingDocente = await db.select().from(docentes).where(eq(docentes.usuarioId, targetUserId));
+      const existingDocente = await db.select().from(docentes).where(eq(docentes.usuarioId, targetUserId));
+      let docenteId: number | undefined;
       if (existingDocente.length === 0) {
-        await db.insert(docentes).values({ usuarioId: targetUserId });
-        existingDocente = await db.select().from(docentes).where(eq(docentes.usuarioId, targetUserId));
+        const [insertResult] = await db.insert(docentes).values({ usuarioId: targetUserId });
+        docenteId = insertResult.insertId;
+      } else {
+        docenteId = existingDocente[0]?.id;
       }
-      const docenteId = existingDocente[0]?.id;
 
       // Limpiar asignaciones previas de este docente
       if (docenteId) {
